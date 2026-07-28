@@ -1,1 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Irish Supermarket Price Finder</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      color: white;
+      margin-bottom: 40px;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+    }
+
+    .subtitle {
+      font-size: 1.1rem;
+      opacity: 0.9;
+    }
+
+    .search-box {
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      margin-bottom: 30px;
+    }
+
+    .search-input-wrapper {
+      display: flex;
+      gap: 10px;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      padding: 15px 20px;
+      font-size: 1rem;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      transition: border-color 0.3s;
+    }
+
+    input[type="text"]:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+
+    button {
+      padding: 15px 40px;
+      background: #667eea;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.3s;
+      font-weight: 600;
+    }
+
+    button:hover:not(:disabled) {
+      background: #5568d3;
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .loading {
+      text-align: center;
+      color: white;
+      margin: 20px 0;
+      font-size: 1.1rem;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-top: 3px solid white;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-right: 10px;
+      vertical-align: middle;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .results {
+      margin-top: 30px;
+    }
+
+    .result-item {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 15px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .result-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .result-item.cheapest {
+      border-left: 5px solid #4caf50;
+      background: #f1f8f4;
+    }
+
+    .product-info h3 {
+      color: #333;
+      margin-bottom: 5px;
+      font-size: 1.1rem;
+    }
+
+    .store-name {
+      color: #666;
+      font-size: 0.95rem;
+    }
+
+    .price-container {
+      text-align: right;
+    }
+
+    .price {
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: #667eea;
+    }
+
+    .cheapest-badge {
+      display: inline-block;
+      background: #4caf50;
+      color: white;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      margin-top: 5px;
+    }
+
+    .no-results {
+      background: white;
+      border-radius: 12px;
+      padding: 40px;
+      text-align: center;
+      color: #666;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .error {
+      background: #ffebee;
+      border: 2px solid #ef5350;
+      color: #c62828;
+      padding: 20px;
+      border-radius: 12px;
+      margin-top: 20px;
+    }
+
+    .example-products {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+      flex-wrap: wrap;
+    }
+
+    .example-btn {
+      background: white;
+      color: #667eea;
+      border: 2px solid #667eea;
+      padding: 8px 15px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: all 0.3s;
+    }
+
+    .example-btn:hover {
+      background: #667eea;
+      color: white;
+    }
+
+    .stats {
+      color: white;
+      text-align: center;
+      margin-top: 20px;
+      font-size: 0.95rem;
+    }
+
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 1.8rem;
+      }
+
+      .search-input-wrapper {
+        flex-direction: column;
+      }
+
+      button {
+        width: 100%;
+      }
+
+      .result-item {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .price-container {
+        text-align: left;
+        width: 100%;
+        margin-top: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🛒 Irish Supermarket Prices</h1>
+      <p class="subtitle">Compare prices across Dunnes, Lidl & Aldi in real-time</p>
+    </header>
+
+    <div class="search-box">
+      <div class="search-input-wrapper">
+        <input
+          type="text"
+          id="searchInput"
+          placeholder="Search a product (e.g., watermelon, milk, bread...)"
+          autocomplete="off"
+        >
+        <button onclick="search()" id="searchBtn">Search</button>
+      </div>
+      <div class="example-products">
+        <small style="width: 100%; color: #666; margin-top: 10px;">Try: </small>
+        <button class="example-btn" onclick="searchProduct('watermelon')">Watermelon</button>
+        <button class="example-btn" onclick="searchProduct('bread')">Bread</button>
+        <button class="example-btn" onclick="searchProduct('milk')">Milk</button>
+        <button class="example-btn" onclick="searchProduct('chicken')">Chicken</button>
+        <button class="example-btn" onclick="searchProduct('bananas')">Bananas</button>
+      </div>
+    </div>
+
+    <div id="output"></div>
+  </div>
+
+  <script>
+    const apiBase = '/api/search';
+
+    function searchProduct(product) {
+      document.getElementById('searchInput').value = product;
+      search();
+    }
+
+    async function search() {
+      const query = document.getElementById('searchInput').value.trim();
+      if (!query) {
+        alert('Please enter a product name');
+        return;
+      }
+
+      const output = document.getElementById('output');
+      const btn = document.getElementById('searchBtn');
+
+      output.innerHTML = '<div class="loading"><span class="spinner"></span>Searching Dunnes, Lidl & Aldi...</div>';
+      btn.disabled = true;
+
+      try {
+        const response = await fetch(`${apiBase}?query=${encodeURIComponent(query)}`);
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.message || 'Search failed');
+        }
+
+        if (data.results.length === 0) {
+          output.innerHTML = '<div class="no-results"><p>No results found for "<strong>' + query + '</strong>"</p><p style="margin-top: 10px; font-size: 0.9rem;">Try a different product name</p></div>';
+        } else {
+          let html = `<div class="results"><div class="stats">Found ${data.results.length} products</div>`;
+
+          data.results.forEach((result, index) => {
+            const isCheapest = index === 0;
+            const cheapestClass = isCheapest ? 'cheapest' : '';
+            const badgeHtml = isCheapest ? '<span class="cheapest-badge">✓ Cheapest</span>' : '';
+
+            html += `
+              <div class="result-item ${cheapestClass}">
+                <div class="product-info">
+                  <h3>${result.product}</h3>
+                  <div class="store-name">📍 ${result.store}</div>
+                </div>
+                <div class="price-container">
+                  <div class="price">${result.currency}${result.price.toFixed(2)}</div>
+                  ${badgeHtml}
+                </div>
+              </div>
+            `;
+          });
+
+          html += '</div>';
+          output.innerHTML = html;
+        }
+      } catch (error) {
+        output.innerHTML = `<div class="error">❌ Error: ${error.message}</div>`;
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    document.getElementById('searchInput').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') search();
+    });
+  </script>
+</body>
+</html>
